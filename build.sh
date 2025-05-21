@@ -1,6 +1,7 @@
 if [ -d "build" ]; then rm -Rf build; fi
 if [ -d "bin" ]; then rm -Rf bin; fi
-rm simulation_results/*.csv
+if [ -d "simulation_results"]; then rm -RF simulation_results; fi
+mkdir -p simulation_results
 mkdir -p build
 cd build || exit
 rm -rf *
