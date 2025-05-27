@@ -7,15 +7,12 @@
 #include <string>
 #include <cassert>
 
-// We include any models that are directly contained within this coupled model
 #include "../atomic models/helo.hpp"
 #include "../CompsInfo.hpp"
 
-// data structures
-
 using namespace std;
 
-namespace cadmium::RLHeloCTRL {
+namespace cadmium::SimpleHelo {
     class Top_model : public Coupled {
         public:
         Top_model(const string& id): Coupled(id){
@@ -30,6 +27,6 @@ namespace cadmium::RLHeloCTRL {
             addCoupling(heloInput->out, helo->in);
         }
     };
-} // namespace cadmium::RLHeloCTRL
+} // namespace cadmium::SimpleHelo
 
 #endif // __TOP_MODEL_HPP__

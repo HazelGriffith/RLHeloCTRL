@@ -1,10 +1,8 @@
 #ifndef __HELO_HPP__
 #define __HELO_HPP__
-#define COMPS_LENGTH 8
+#define COMPS_LENGTH 9
 #define PROB_OF_FAULT 50
 
-// This is an atomic model, meaning it has its' own internal logic/computation
-// So, it is necessary to include atomic.hpp
 #include "cadmium/modeling/devs/atomic.hpp"
 #include "../CompsInfo.hpp"
 #include <iostream>
@@ -15,7 +13,7 @@
 
 using namespace std;
 
-namespace cadmium::RLHeloCTRL {
+namespace cadmium::SimpleHelo {
 	/* State of the helicopter, where each int in the vector array indicates the status of a componenent
     comps[0] = TakeOff
     comps[1] = Sticks
@@ -30,42 +28,30 @@ namespace cadmium::RLHeloCTRL {
     */
 	struct HeloState {
 
-		// sigma is a mandatory variable, used to advance the time of the simulation
 		double sigma;
 
 		// Declare model-specific variables
 		vector<int> comps;
 		
 		// Set the default values for the state constructor for this specific model
-		HeloState(): sigma(0), comps({0,0,0,0,0,0,0,0}) {};
+		HeloState(): sigma(0), comps({0,0,0,0,0,0,0,0,0}) {};
 	};
 
 	std::ostream& operator<<(std::ostream &out, const HeloState& state) {
-		string compNames[COMPS_LENGTH] = {"TakeOff", "Sticks", "Knobs", "WP", "NMPC", "DAA", "PilotTakeover", "Landing"};
-        for (int i = 0; i < COMPS_LENGTH; i++){
-            out << compNames[i];
-            if (state.comps.at(i) == 0){
-                out << " is off,";
-            } else if (state.comps.at(i) == -1){
-                out << " is broken,";
-            } else {
-                if (i != 7){
-                    if (state.comps.at(i) == 1){
-                        out << " is on,";
-                    } else {
-                        out << " is not in a valid state,";
-                    }
-                } else {
-                    if (state.comps.at(i) == 1){
-                        out << " is landing with no-hover,";
-                    } else if (state.comps.at(i) == 2){
-                        out << " is landing with hover,";
-                    } else {
-                        out << " is not in a valid state,";
-                    }
-                }
-            } 
-        }
+		string compNames[COMPS_LENGTH] = {"TakeOff", "Sticks", "Knobs", "WP", "NMPC", "DAA", "PilotTakeover", "Landing/NoHover", "Landing/Hover"};
+		for (int i = 0; i < COMPS_LENGTH; i++){
+			out << compNames[i];
+			int compState = state.comps.at(i);
+			if (compState == 0){
+				out << " is off,";
+			} else if (compState == -1){
+				out << " is broken,";
+			} else if (compState == 1){
+				out << " is on,";
+			} else {
+				out << " is not in a valid state,";
+			}
+		}
 		return out;
 	}
 
@@ -88,8 +74,7 @@ namespace cadmium::RLHeloCTRL {
 			/**
 			 * Constructor function for this atomic model, and its respective state object.
 			 *
-			 * For this model, both a Helo object and a Helo object
-			 * are created, using the same id.
+			 * A Helo object is created with a HeloState struct
 			 *
 			 * @param id ID of the new Helo model object, will be used to identify results on the output file
 			 */
@@ -102,12 +87,7 @@ namespace cadmium::RLHeloCTRL {
 
 				// Output Ports
 				out = addOutPort<CompsInfo>("out");
-
-				// Initialize variables for the model's behaviour
 				
-
-				// Set a value for sigma (so it is not 0), this determines how often the
-				// internal transition occurs
 				state.sigma = 25;
 				
 			}
@@ -116,7 +96,9 @@ namespace cadmium::RLHeloCTRL {
 			 * The transition function is invoked each time the value of
 			 * state.sigma reaches 0.
 			 *
-			 * In this model, the value of state.lightOn is toggled.
+			 * In each internal transition the model generates a random number to determine if a fault has occurred with any component
+			 * If a fault has occurred, then a random component is selected to be in the "broken" state
+			 * If the selected component is already "broken" then it is set to "off"
 			 *
 			 * @param state reference to the current state of the model.
 			 */
@@ -142,6 +124,8 @@ namespace cadmium::RLHeloCTRL {
 			 * The external transition function is invoked each time external data
 			 * is sent to an input port for this model.
 			 *
+			 * The state of the helicopter only advances to the state it is told to advance to, unless a component is broken
+			 * 
 			 * @param state reference to the current model state.
 			 * @param e time elapsed since the last state transition function was triggered.
 			 */
@@ -169,6 +153,8 @@ namespace cadmium::RLHeloCTRL {
 
 			/**
 			 * This function outputs any desired state values to their associated ports.
+			 * 
+			 * The state of every component is output
 			 *
 			 * @param state reference to the current model state.
 			 */
@@ -178,6 +164,8 @@ namespace cadmium::RLHeloCTRL {
 
 			/**
 			 * It returns the value of state.sigma for this model.
+			 * 
+			 * Currently, sigma is only used to determine the frequency of faults
 			 *
 			 * @param state reference to the current model state.
 			 * @return the sigma value.

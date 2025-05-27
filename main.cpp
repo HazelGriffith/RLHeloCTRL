@@ -4,12 +4,9 @@
 #include <iostream>
 #include <string>
 
-
-// We must include our "top model" which is a coupled model used to
-// that hold other models inside of it
 #include "include/coupled models/top_model.hpp"
 
-using namespace cadmium::RLHeloCTRL;
+using namespace cadmium::SimpleHelo;
 
 int main(int argc,char* argv[]){
 	
@@ -17,12 +14,11 @@ int main(int argc,char* argv[]){
     auto model = std::make_shared<Top_model>("top_model");
     auto rootCoordinator = cadmium::RootCoordinator(model);
 	
-    // For simulation purposes, set the name of the output file
+    //set the name of the output file
 	rootCoordinator.setLogger<cadmium::CSVLogger>("simulation_results/results.csv",",");
 
     rootCoordinator.start();
 
-    // For simulations, we can set the number of seconds we want to simulate
     rootCoordinator.simulate(250.0);
 
     rootCoordinator.stop();

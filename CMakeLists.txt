@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(RLHeloCTRL)
+project(SimpleHelo)
 
-find_package(Python REQUIRED Development)
+#find_package(Python REQUIRED Development)
 
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
@@ -23,4 +23,5 @@ target_include_directories(main.out PRIVATE "." "include" $ENV{CADMIUM})
 # Non-ESP32 specific compile options
 target_compile_options(main.out PUBLIC -std=gnu++2b)
 
-target_link_libraries(main.out data_structures Python::Python)
+target_link_libraries(main.out data_structures)
+#target_link_libraries(main.out data_structures Python::Python)

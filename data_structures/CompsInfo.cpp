@@ -1,4 +1,4 @@
-#define COMPS_LENGTH 8
+#define COMPS_LENGTH 9
 
 #include <math.h> 
 #include <iostream>
@@ -11,30 +11,19 @@
 /***************************************************/
 
 ostream& operator << (ostream &out, const CompsInfo &e){
-	std::string compNames[COMPS_LENGTH] = {"TakeOff", "Sticks", "Knobs", "WP", "NMPC", "DAA", "PilotTakeover", "Landing"};
+	std::string compNames[COMPS_LENGTH] = {"TakeOff", "Sticks", "Knobs", "WP", "NMPC", "DAA", "PilotTakeover", "Landing/NoHover", "Landing/Hover"};
     for (int i = 0; i < COMPS_LENGTH; i++){
         out << compNames[i];
-        if (e.comps.at(i) == 0){
+        int compState = e.comps.at(i);
+        if (compState == 0){
             out << " is off,";
-        } else if (e.comps.at(i) == -1){
-             out << " is broken,";
+        } else if (compState == -1){
+            out << " is broken,";
+        } else if (compState == 1){
+            out << " is on,";
         } else {
-            if (i != 7){
-                if (e.comps.at(i) == 1){
-                    out << " is on,";
-                } else {
-                    out << " is not in a valid e,";
-                }
-            } else {
-                if (e.comps.at(i) == 1){
-                    out << " is landing with no-hover,";
-                } else if (e.comps.at(i) == 2){
-                    out << " is landing with hover,";
-                } else {
-                    out << " is not in a valid e,";
-                }
-            }
-        } 
+            out << " is not in a valid state,";
+        }
     }
 	return out;
 }
