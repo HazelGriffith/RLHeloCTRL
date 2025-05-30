@@ -4,6 +4,8 @@
         "iosfwd": "cpp",
         "array": "cpp",
         "string_view": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "algorithm": "cpp",
+        "format": "cpp"
     }
 }

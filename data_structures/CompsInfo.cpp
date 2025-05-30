@@ -11,19 +11,24 @@
 /***************************************************/
 
 ostream& operator << (ostream &out, const CompsInfo &e){
-	std::string compNames[COMPS_LENGTH] = {"TakeOff", "Sticks", "Knobs", "WP", "NMPC", "DAA", "PilotTakeover", "Landing/NoHover", "Landing/Hover"};
+	std::string compNames[COMPS_LENGTH] = {"TakeOff", "Sticks", "Knobs", "WP", "NMPC", "DAA", "PilotTakeover", "LandingNoHover", "LandingHover"};
     for (int i = 0; i < COMPS_LENGTH; i++){
         out << compNames[i];
         int compState = e.comps.at(i);
-        if (compState == 0){
-            out << " is off,";
-        } else if (compState == -1){
-            out << " is broken,";
-        } else if (compState == 1){
-            out << " is on,";
-        } else {
-            out << " is not in a valid state,";
-        }
+        switch(compState){
+				case 0:
+					out << " is off,";
+					break;
+				case -1:
+					out << " is broken,";
+					break;
+				case 1:
+					out << " is on,";
+					break;
+				default:
+					out << " is not in a valid state,";
+					break;
+			}
     }
 	return out;
 }
