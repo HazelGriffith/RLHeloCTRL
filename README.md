@@ -7,7 +7,7 @@ However, if the component being changed is currently "broken", then it will not 
 
 ## Installation
 Follow the Cadmium V2 installation manual to setup the environment, then clone the repository and run "./build.sh" to create the "main.out" executable in the bin folder. 
-If you run the executable with "./main.out" it will run the sample simulation with the input script provided.
+If you run the executable with "./bin/main.out" it will run the sample simulation with the input script provided.
 
 ## Plans for the Future
 - Add a type of fault where an illegal transition occurs
