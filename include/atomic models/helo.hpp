@@ -113,6 +113,8 @@ namespace cadmium::SimpleHelo {
 			// Output ports
 			Port<CompsInfo> out;
 
+			bool randFaults;
+
 			/**
 			 * Constructor function for this atomic model, and its respective state object.
 			 *
@@ -120,7 +122,7 @@ namespace cadmium::SimpleHelo {
 			 *
 			 * @param id ID of the new Helo model object, will be used to identify results on the output file
 			 */
-			Helo(const string& id): Atomic<HeloState>(id, HeloState()) {
+			Helo(const string& id, bool in_randFaults): Atomic<HeloState>(id, HeloState()) {
 
 				// Initialize ports for the model
 
@@ -129,6 +131,8 @@ namespace cadmium::SimpleHelo {
 
 				// Output Ports
 				out = addOutPort<CompsInfo>("out");
+
+				randFaults = in_randFaults;
 				
 				state.sigma = FAULT_FREQ;
 				
@@ -145,54 +149,57 @@ namespace cadmium::SimpleHelo {
 			 * @param state reference to the current state of the model.
 			 */
 			void internalTransition(HeloState& state) const override {
-				unsigned seed1 = chrono::system_clock::now().time_since_epoch().count();
-				minstd_rand0 generator(seed1);
-                uniform_int_distribution<> probDist(1,100);
-                uniform_int_distribution<> compDist(0,COMPS_LENGTH-1);
-                int faultChance = probDist(generator);
-				int randomComp;
+				if (randFaults){
+					unsigned seed1 = chrono::system_clock::now().time_since_epoch().count();
+					minstd_rand0 generator(seed1);
+					uniform_int_distribution<> probDist(1,100);
+					uniform_int_distribution<> compDist(0,COMPS_LENGTH-1);
+					int faultChance = probDist(generator);
+					int randomComp;
 
-				// generate a fault if one is not already happening
-				if ((faultChance <= PROB_OF_BREAK)&&(state.fault == false)){
-					// generate a broken component fault
-					state.prevComps = state.currComps;
-					randomComp = compDist(generator);
-					state.currComps.at(randomComp) = -1;
-					state.fault = true;
-				}
-
-				faultChance = probDist(generator);
-				if ((faultChance <= PROB_OF_MULTICOMPS)&&(state.fault == false)){
-					// generate a multiple components are on fault
-					state.prevComps = state.currComps;
-					randomComp = compDist(generator);
-					while (state.currComps.at(randomComp) != 0){
+					// generate a fault if one is not already happening
+					if ((faultChance <= PROB_OF_BREAK)&&(state.fault == false)){
+						// generate a broken component fault
+						state.prevComps = state.currComps;
 						randomComp = compDist(generator);
+						state.currComps.at(randomComp) = -1;
+						state.fault = true;
 					}
-					state.currComps.at(randomComp) = 1;
-					state.fault = true;
-				}
 
-				faultChance = probDist(generator);
-				if ((faultChance <= PROB_OF_BAD_TRANSITION)&&(state.fault == false)){
-					// generate a bad transition fault
-					state.prevComps = state.currComps;
-					randomComp = compDist(generator);
-					int activeCompInd = -1;
-					for (int i = 0; i < COMPS_LENGTH; i++){
-						if (state.currComps.at(i) == 1){
-							activeCompInd = i;
-							break;
+					faultChance = probDist(generator);
+					if ((faultChance <= PROB_OF_MULTICOMPS)&&(state.fault == false)){
+						// generate a multiple components are on fault
+						state.prevComps = state.currComps;
+						randomComp = compDist(generator);
+						while (state.currComps.at(randomComp) != 0){
+							randomComp = compDist(generator);
 						}
+						state.currComps.at(randomComp) = 1;
+						state.fault = true;
 					}
-					randomComp = compDist(generator);
-					while ((state.currComps.at(randomComp) != 0)||(randomComp == activeCompInd)){
+
+					faultChance = probDist(generator);
+					if ((faultChance <= PROB_OF_BAD_TRANSITION)&&(state.fault == false)){
+						// generate a bad transition fault
+						state.prevComps = state.currComps;
 						randomComp = compDist(generator);
+						int activeCompInd = -1;
+						for (int i = 0; i < COMPS_LENGTH; i++){
+							if (state.currComps.at(i) == 1){
+								activeCompInd = i;
+								break;
+							}
+						}
+						randomComp = compDist(generator);
+						while ((state.currComps.at(randomComp) != 0)||(randomComp == activeCompInd)){
+							randomComp = compDist(generator);
+						}
+						state.currComps.at(randomComp) = 1;
+						state.currComps.at(activeCompInd) = 0;
+						state.fault = true;
 					}
-					state.currComps.at(randomComp) = 1;
-					state.currComps.at(activeCompInd) = 0;
-					state.fault = true;
 				}
+				
 
 				// check if a fault is in progress or resolved
 				int numbOfOnComps = 0;

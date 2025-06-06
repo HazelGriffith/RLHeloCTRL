@@ -15,10 +15,10 @@ using namespace std;
 namespace cadmium::SimpleHelo {
     class Top_model : public Coupled {
         public:
-        Top_model(const string& id): Coupled(id){
+        Top_model(const string& id, bool randFaults): Coupled(id){
 
             // Declare and initialize all models
-			shared_ptr<Helo> helo = addComponent<Helo>("Helo");
+			shared_ptr<Helo> helo = addComponent<Helo>("Helo", randFaults);
 
             // Connect the models with coupling
 			string filepath1 = "include/input_data/a.txt";
