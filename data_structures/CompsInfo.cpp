@@ -17,16 +17,16 @@ ostream& operator << (ostream &out, const CompsInfo &e){
         int compState = e.comps.at(i);
         switch(compState){
 				case 0:
-					out << " is off,";
+					out << " is off ";
 					break;
 				case -1:
-					out << " is broken,";
+					out << " is broken ";
 					break;
 				case 1:
-					out << " is on,";
+					out << " is on ";
 					break;
 				default:
-					out << " is not in a valid state,";
+					out << " is not in a valid state ";
 					break;
 			}
     }
